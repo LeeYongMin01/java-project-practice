@@ -16,7 +16,7 @@ local.properties
 .recommenders
 .classpath
 .project
-.bat
+
 
 
 # External tool builders
@@ -186,8 +186,11 @@ $RECYCLE.BIN/
 ### Gradle ###
 .gradle
 build/
-gradle/
+gradle/wrapper
 gradlew
+gradlew.bat
+settings.gradle
+build.gradle
 
 # Ignore Gradle GUI config
 gradle-app.setting
