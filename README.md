@@ -1,1 +1,1 @@
-"# java-project-practice" 
+** 자바 미니 프로젝트 학습 및 복습 **
