@@ -57,6 +57,8 @@ public class ProjectHandler {
      System.out.println("등록된 회원이 아닙니다.");
      }
    }
+   project.members = members.toString();
+   
    list[size++] = project;
  }
 
