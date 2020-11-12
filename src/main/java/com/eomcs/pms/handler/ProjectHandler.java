@@ -17,10 +17,12 @@ public class ProjectHandler {
  }
 
  static final int PLENGTH = 100;
- static Project[] list = new Project[PLENGTH];
- static int size = 0;
+  Project[] list = new Project[PLENGTH];
+  int size = 0;
+  
+  public MemberHandler memberHandler;
 
- public static void add() {
+ public void add() {
    System.out.println("[프로젝트 등록]");
 
    Project project = new Project();
@@ -35,7 +37,7 @@ public class ProjectHandler {
      if(name.length() == 0) {
        System.out.println("프로젝트 등록을 취소합니다.");
        return;
-     } else if(MemberHandler.findByName(name) != null) {
+     } else if(memberHandler.findByName(name) != null) {
        project.owner = name;
        break;
      }
@@ -48,7 +50,7 @@ public class ProjectHandler {
 
      if(name.length() == 0) {
        break;
-     } else if (MemberHandler.findByName(name) != null) {
+     } else if (memberHandler.findByName(name) != null) {
        if(members.length() > 0) {
        members.append(",");
      }
@@ -59,14 +61,14 @@ public class ProjectHandler {
    }
    project.members = members.toString();
    
-   list[size++] = project;
+   this.list[this.size++] = project;
  }
 
- public static void list() {
+ public void list() {
    System.out.println("[프로젝트 목록]");
 
-   for (int i = 0; i < size; i++) {
-     Project project = list[i];
+   for (int i = 0; i < this.size; i++) {
+     Project project = this.list[i];
      System.out.printf("%d, %s, %s, %s, %s, [%s]\n",
          project.no,
          project.title,

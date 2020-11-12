@@ -15,10 +15,10 @@ public class BoardHandler {
   }
   
   static final int LENGTH = 100;
-  static Board[] list = new Board[LENGTH];
-  static int size = 0;
+  Board[] list = new Board[LENGTH];
+  int size = 0;
   
-  public static void add() {
+  public void add() {
     System.out.println("[게시물 등록]");
     
     Board board = new Board();
@@ -28,16 +28,16 @@ public class BoardHandler {
     board.writer = Prompt.inputString("작성자? ");
     board.registeredDate = new Date(System.currentTimeMillis());
     board.viewCount = 0;
-    list[size++] = board;
+    this.list[this.size++] = board;
     
     System.out.println("게시글을 등록하였습니다.");
   }
   
-  public static void list() {
+  public void list() {
     System.out.println("[게시글 목록]");
 
-    for(int i = 0; i < size; i++) {
-      Board board = list[i];
+    for(int i = 0; i < this.size; i++) {
+      Board board = this.list[i];
       System.out.printf("%d, %s, %s, %s, %d\n",
           board.no,
           board.title,
@@ -45,6 +45,5 @@ public class BoardHandler {
           board.registeredDate,
           board.viewCount);
     }
-    
   }
 }

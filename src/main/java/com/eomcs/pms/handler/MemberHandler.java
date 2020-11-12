@@ -17,10 +17,10 @@ public class MemberHandler {
   }
 
   static final int LENGTH = 100;
-  static Member[] list = new Member[LENGTH]; // 출력을 위해 담아놓을 배열 준비
-  static int size = 0;
+  Member[] list = new Member[LENGTH]; // 출력을 위해 담아놓을 배열 준비
+  int size = 0;
 
-  public static void add() {
+  public void add() {
     System.out.println("[회원 등록]");
 
     Member member = new Member();
@@ -31,14 +31,14 @@ public class MemberHandler {
     member.photo = Prompt.inputString("사진? ");
     member.tel = Prompt.inputString("전화? ");
     member.registeredDate = new java.sql.Date(System.currentTimeMillis());
-    list[size++] = member;
+    this.list[this.size++] = member;
   }
 
-  public static void list() {
+  public void list() {
     System.out.println("[회원 목록]");
 
-    for (int i = 0; i < size; i++) {
-      Member member = list[i];
+    for (int i = 0; i < this.size; i++) {
+      Member member = this.list[i];
       System.out.printf("%d, %s, %s, %s, %s\n",
           member.no,
           member.name,
@@ -48,9 +48,9 @@ public class MemberHandler {
     }
   }
 
-  public static Member findByName(String name) {
-    for(int i = 0; i < size; i++) {
-      Member member = list[i];
+  public Member findByName(String name) {
+    for(int i = 0; i < this.size; i++) {
+      Member member = this.list[i];
       if(member.name.equals(name)) {
         return member;
       }
