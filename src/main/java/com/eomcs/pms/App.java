@@ -18,15 +18,9 @@ public class App {
     BoardHandler boardHandler6 = new BoardHandler();
  
     MemberHandler memberHandler = new MemberHandler();
-    
-    ProjectHandler projectHandler = new ProjectHandler();
-    projectHandler.memberHandler = memberHandler;
+    ProjectHandler projectHandler = new ProjectHandler(memberHandler);
+    TaskHandler taskHandler = new TaskHandler(memberHandler);
 
-    TaskHandler taskHandler = new TaskHandler();
-    taskHandler.memberHandler = memberHandler;
-
-     
-    
     loop:
       while (true) {
         String command = Prompt.inputString("명령> ");
