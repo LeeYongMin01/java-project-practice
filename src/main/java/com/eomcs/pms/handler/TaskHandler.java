@@ -40,9 +40,9 @@ public class TaskHandler {
 
   public void list() {
     System.out.println("[작업 목록]");
-    Task[] tasks = taskList.toArray(Task[].class);
 
-    for (Task task : tasks) {
+    for (int i = 0; i < taskList.size(); i++) {
+      Task task = taskList.get(i);
       String stateLabel = null;
       switch (task.getStatus()) {
         case 1:

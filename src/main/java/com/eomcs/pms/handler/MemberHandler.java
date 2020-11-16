@@ -26,10 +26,8 @@ public class MemberHandler {
 
   public void list() {
     System.out.println("[회원 목록]");
-
-    Member[] members = memberList.toArray(Member[].class);
-
-    for (Member member : members) {
+    for (int i = 0; i < memberList.size(); i++) {
+      Member member = memberList.get(i);
       System.out.printf("%d, %s, %s, %s, %s\n",
           member.getNo(),
           member.getName(),
@@ -40,9 +38,8 @@ public class MemberHandler {
   }
 
   public Member findByName(String name) {
-    Member[] members = memberList.toArray(Member[].class);
-
-    for(Member member : members) {
+    for(int i = 0; i < memberList.size(); i++) {
+      Member member = memberList.get(i);
       if(member.getName().equals(name)) {
         return member;
       }

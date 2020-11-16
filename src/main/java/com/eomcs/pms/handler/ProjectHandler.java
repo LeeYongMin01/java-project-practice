@@ -59,9 +59,8 @@ public class ProjectHandler {
  public void list() {
    System.out.println("[프로젝트 목록]");
 
-   Project[] projects = projectList.toArray(Project[].class);
-
-   for (Project project : projects) {
+   for (int i = 0; i < projectList.size(); i++) {
+     Project project = projectList.get(i);
      System.out.printf("%d, %s, %s, %s, %s, [%s]\n",
          project.getNo(),
          project.getTitle(),
