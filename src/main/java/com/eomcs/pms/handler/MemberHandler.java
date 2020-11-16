@@ -1,12 +1,13 @@
 package com.eomcs.pms.handler;
 
 import com.eomcs.pms.domain.Member;
+import com.eomcs.util.ArrayList;
 import com.eomcs.util.Prompt;
 
 public class MemberHandler {
 
-  MemberList memberList = new MemberList();
-  
+  ArrayList<Member> memberList = new ArrayList<>();
+
   public void add() {
     System.out.println("[회원 등록]");
 
@@ -18,16 +19,16 @@ public class MemberHandler {
     member.setPhoto(Prompt.inputString("사진? "));
     member.setTel(Prompt.inputString("전화? "));
     member.setRegisteredDate(new java.sql.Date(System.currentTimeMillis()));
-    
+
     memberList.add(member);
-    
+
   }
 
   public void list() {
     System.out.println("[회원 목록]");
 
-    Member[] members = memberList.toArray();
-    
+    Member[] members = memberList.toArray(Member[].class);
+
     for (Member member : members) {
       System.out.printf("%d, %s, %s, %s, %s\n",
           member.getNo(),
@@ -39,10 +40,10 @@ public class MemberHandler {
   }
 
   public Member findByName(String name) {
-    Member[] members = memberList.toArray();
-    
+    Member[] members = memberList.toArray(Member[].class);
+
     for(Member member : members) {
-      if(member.name.equals(name)) {
+      if(member.getName().equals(name)) {
         return member;
       }
     }

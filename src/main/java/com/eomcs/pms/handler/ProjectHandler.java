@@ -1,18 +1,19 @@
 package com.eomcs.pms.handler;
 
 import com.eomcs.pms.domain.Project;
+import com.eomcs.util.ArrayList;
 import com.eomcs.util.Prompt;
 
 public class ProjectHandler {
 
-  ProjectList projectList = new ProjectList();
-  
+  ArrayList<Project> projectList = new ArrayList<>();
+
   MemberHandler memberHandler;
-  
+
   public ProjectHandler(MemberHandler memberhandler) {
     this.memberHandler = memberhandler;
   }
-  
+
  public void add() {
    System.out.println("[프로젝트 등록]");
 
@@ -29,7 +30,7 @@ public class ProjectHandler {
        System.out.println("프로젝트 등록을 취소합니다.");
        return;
      } else if(memberHandler.findByName(name) != null) {
-       project.owner = name;
+       project.setOwner(name);
        break;
      }
      System.out.println("등록된 회원이 아닙니다.");
@@ -50,15 +51,16 @@ public class ProjectHandler {
      System.out.println("등록된 회원이 아닙니다.");
      }
    }
-   project.members = members.toString();
-   
+   project.setMembers(members.toString());
+
   projectList.add(project);
  }
 
  public void list() {
    System.out.println("[프로젝트 목록]");
 
-   Project[] projects = projectList.toArray();
+   Project[] projects = projectList.toArray(Project[].class);
+
    for (Project project : projects) {
      System.out.printf("%d, %s, %s, %s, %s, [%s]\n",
          project.getNo(),
