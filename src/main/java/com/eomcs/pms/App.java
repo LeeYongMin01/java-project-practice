@@ -14,7 +14,7 @@ public class App {
     MemberHandler memberHandler = new MemberHandler();
     ProjectHandler projectHandler = new ProjectHandler(memberHandler);
     TaskHandler taskHandler = new TaskHandler(memberHandler);
-
+ 
     loop:
       while (true) {
         String command = Prompt.inputString("명령> ");
