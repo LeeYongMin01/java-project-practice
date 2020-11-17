@@ -37,6 +37,79 @@ public class MemberHandler {
     }
   }
 
+
+  public void detail() {
+    System.out.println("[회원 상세보기]");
+    int no = Prompt.inputInt("번호? ");
+    Member member = findByNo(no);
+
+    if(member == null) {
+      System.out.println("해당 번호의 회원이 없습니다.");
+      return;
+    }
+
+    System.out.printf("이름: %s\n", member.getName());
+    System.out.printf("이메일: %s\n", member.getEmail());
+    System.out.printf("사진: %s\n", member.getPhoto());
+    System.out.printf("전화: %s\n", member.getTel());
+    System.out.printf("등록일: %s\n", member.getRegisteredDate());
+  }
+
+  public void update() {
+    System.out.println("[회원 변경]");
+    int no = Prompt.inputInt("번호? ");
+    Member member = findByNo(no);
+
+    if(member == null) {
+      System.out.println("해당 번호의 회원이 없습니다.");
+      return;
+    }
+
+    String name = Prompt.inputString(
+        String.format("이름(%s)? ", member.getName()));
+    String email = Prompt.inputString(
+        String.format("이메일(%s)? ", member.getEmail()));
+    String password = Prompt.inputString("암호? ");
+    String photo = Prompt.inputString(
+        String.format("사진(%s)? ", member.getPhoto()));
+    String tel = Prompt.inputString(
+        String.format("전화(%s)? ", member.getTel()));
+
+    String response = Prompt.inputString("정말 변경하시겠습니까?(y/N) ");
+    if(!response.equalsIgnoreCase("y")) {
+      System.out.println("회원 변경을 취소하였습니다.");
+      return;
+    }
+
+    member.setName(name);
+    member.setEmail(email);
+    member.setPassword(password);
+    member.setPhoto(photo);
+    member.setTel(tel);
+
+    System.out.println("회원을 변경하였습니다.");
+  }
+
+  public void delete() {
+    System.out.println("[회원 삭제]");
+    int no = Prompt.inputInt("번호? ");
+    int index = indexOf(no);
+
+    if(index == -1) {
+      System.out.println("해당 번호의 회원이 없습니다.");
+      return;
+    }
+
+    String response = Prompt.inputString("정말 삭제하시겠습니까?(y/N)");
+    if(!response.equalsIgnoreCase("y")) {
+      System.out.println("회원 삭제를 취소하였습니다.");
+      return;
+    }
+
+    memberList.remove(index);
+    System.out.println("회원을 삭제하였습니다.");
+  }
+
   public Member findByName(String name) {
     for(int i = 0; i < memberList.size(); i++) {
       Member member = memberList.get(i);
@@ -45,5 +118,25 @@ public class MemberHandler {
       }
     }
     return null;
+  }
+
+  private Member findByNo(int no) {
+    for(int i = 0; i < memberList.size(); i++) {
+      Member member = memberList.get(i);
+      if(member.getNo() == no) {
+        return member;
+      }
+    }
+    return null;
+  }
+
+  private int indexOf(int no) {
+    for(int i = 0; i < memberList.size(); i++) {
+      Member member = memberList.get(i);
+      if(member.getNo() == no) {
+        return i;
+      }
+    }
+    return -1;
   }
 }

@@ -9,7 +9,7 @@ import com.eomcs.util.Prompt;
 public class App {
 
   public static void main(String[] args) {
- 
+
     BoardHandler boardHandler = new BoardHandler();
     MemberHandler memberHandler = new MemberHandler();
     ProjectHandler projectHandler = new ProjectHandler(memberHandler);
@@ -22,11 +22,20 @@ public class App {
         switch (command) {
           case "/member/add": memberHandler.add(); break;
           case "/member/list": memberHandler.list(); break;
+          case "/member/detail": memberHandler.detail(); break;
+          case "/member/update": memberHandler.update(); break;
+          case "/member/delete": memberHandler.delete(); break;
           case "/project/add": projectHandler.add(); break;
           case "/project/list": projectHandler.list(); break;
+          case "/project/detail": projectHandler.detail(); break;
+          case "/project/update": projectHandler.update(); break;
+          case "/project/delete": projectHandler.delete(); break;
           case "/task/add": taskHandler.add(); break;
           case "/task/list": taskHandler.list(); break;
-          case "/board/add" : boardHandler.add(); break; 
+          case "/task/detail": taskHandler.detail(); break;
+          case "/task/update": taskHandler.update(); break;
+          case "/task/delete": taskHandler.delete(); break;
+          case "/board/add": boardHandler.add(); break;
           case "/board/list": boardHandler.list(); break;
           case "/board/detail": boardHandler.detail(); break;
           case "/board/update": boardHandler.update(); break;
