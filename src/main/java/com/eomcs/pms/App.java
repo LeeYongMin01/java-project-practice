@@ -16,6 +16,7 @@ import com.eomcs.pms.handler.BoardDeleteCommand;
 import com.eomcs.pms.handler.BoardDetailCommand;
 import com.eomcs.pms.handler.BoardListCommand;
 import com.eomcs.pms.handler.BoardUpdateCommand;
+import com.eomcs.pms.handler.HelloCommand;
 import com.eomcs.pms.handler.MemberAddCommand;
 import com.eomcs.pms.handler.MemberDeleteCommand;
 import com.eomcs.pms.handler.MemberDetailCommand;
@@ -26,7 +27,11 @@ import com.eomcs.pms.handler.ProjectDeleteCommand;
 import com.eomcs.pms.handler.ProjectDetailCommand;
 import com.eomcs.pms.handler.ProjectListCommand;
 import com.eomcs.pms.handler.ProjectUpdateCommand;
-import com.eomcs.pms.handler.TaskHandler;
+import com.eomcs.pms.handler.TaskAddCommand;
+import com.eomcs.pms.handler.TaskDeleteCommand;
+import com.eomcs.pms.handler.TaskDetailCommand;
+import com.eomcs.pms.handler.TaskListCommand;
+import com.eomcs.pms.handler.TaskUpdateCommand;
 import com.eomcs.util.Prompt;
 
 public class App {
@@ -55,8 +60,14 @@ public class App {
     ProjectDeleteCommand projectDeleteCommand = new ProjectDeleteCommand(projectList);
 
     List<Task> taskList = new ArrayList<>();
-    TaskHandler taskHandler = new TaskHandler(taskList, memberHandler);
-
+    TaskAddCommand taskAddCommand = new TaskAddCommand(taskList, memberListCommand);
+    TaskListCommand taskListCommand = new TaskListCommand(taskList);
+    TaskDetailCommand taskDetailCommand = new TaskDetailCommand(taskList);
+    TaskUpdateCommand taskUpdateCommand = new TaskUpdateCommand(taskList, memberListCommand);
+    TaskDeleteCommand taskDeleteCommand = new TaskDeleteCommand(taskList);
+    
+    HelloCommand helloCommand = new HelloCommand();
+    
     Deque<String> commandStack = new ArrayDeque<>();
 
     Queue<String> commandQueue = new LinkedList<>();
@@ -69,27 +80,28 @@ public class App {
         commandQueue.offer(command);
 
         switch (command) {
-          case "/member/add": memberHandler.add(); break;
-          case "/member/list": memberHandler.list(); break;
-          case "/member/detail": memberHandler.detail(); break;
-          case "/member/update": memberHandler.update(); break;
-          case "/member/delete": memberHandler.delete(); break;
-          case "/project/add": projectHandler.add(); break;
-          case "/project/list": projectHandler.list(); break;
-          case "/project/detail": projectHandler.detail(); break;
-          case "/project/update": projectHandler.update(); break;
-          case "/project/delete": projectHandler.delete(); break;
-          case "/task/add": taskHandler.add(); break;
-          case "/task/list": taskHandler.list(); break;
-          case "/task/detail": taskHandler.detail(); break;
-          case "/task/update": taskHandler.update(); break;
-          case "/task/delete": taskHandler.delete(); break;
-          case "/board/add": boardHandler.add(); break;
-          case "/board/list": boardHandler.list(); break;
-          case "/board/detail": boardHandler.detail(); break;
-          case "/board/update": boardHandler.update(); break;
-          case "/board/delete": boardHandler.delete(); break;
-
+          case "/member/add": memberAddCommand.execute(); break;
+          case "/member/list": memberListCommand.execute(); break;
+          case "/member/detail": memberDetailCommand.execute(); break;
+          case "/member/update": memberUpdateCommand.execute(); break;
+          case "/member/delete": memberDeleteCommand.execute(); break;
+          case "/project/add": projectAddCommand.execute(); break;
+          case "/project/list": projectListCommand.execute(); break;
+          case "/project/detail": projectDetailCommand.execute(); break;
+          case "/project/update": projectUpdateCommand.execute(); break;
+          case "/project/delete": projectDeleteCommand.execute(); break;
+          case "/task/add": taskAddCommand.execute(); break;
+          case "/task/list": taskListCommand.execute(); break;
+          case "/task/detail": taskDetailCommand.execute(); break;
+          case "/task/update": taskUpdateCommand.execute(); break;
+          case "/task/delete": taskDeleteCommand.execute(); break;
+          case "/board/add": boardAddCommand.execute(); break;
+          case "/board/list": boardListCommand.execute(); break;
+          case "/board/detail": boardDetailCommand.execute(); break;
+          case "/board/update": boardUpdateCommand.execute(); break;
+          case "/board/delete": boardDeleteCommand.execute(); break;
+          case "/hello": helloCommand.execute(); break;
+          
           case "history": printCommandHistory(commandStack.iterator()); break;
           case "history2": printCommandHistory(commandQueue.iterator()); break;
 
