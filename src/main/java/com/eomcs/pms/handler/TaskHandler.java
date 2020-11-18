@@ -1,16 +1,18 @@
 package com.eomcs.pms.handler;
 
 import java.sql.Date;
+import java.util.Iterator;
+import java.util.List;
 import com.eomcs.pms.domain.Task;
-import com.eomcs.util.ArrayList;
 import com.eomcs.util.Prompt;
 
 public class TaskHandler {
 
-  ArrayList<Task> taskList = new ArrayList<>();
+  List<Task> taskList;
   MemberHandler memberHandler;
 
-  public TaskHandler(MemberHandler memberhandler) {
+  public TaskHandler(List<Task> taskList, MemberHandler memberhandler) {
+    this.taskList = taskList;
     this.memberHandler = memberhandler;
   }
 
@@ -41,9 +43,10 @@ public class TaskHandler {
 
   public void list() {
     System.out.println("[작업 목록]");
+    Iterator<Task> iterator = taskList.iterator();
 
-    for (int i = 0; i < taskList.size(); i++) {
-      Task task = taskList.get(i);
+    while(iterator.hasNext()) {
+      Task task = iterator.next();
       String stateLabel = null;
       switch (task.getStatus()) {
         case 1:
@@ -102,7 +105,7 @@ public class TaskHandler {
     }
 
     String content = Prompt.inputString(
-        String.format("내용(%s) ", task.getContent()));
+        String.format("내용(%s)? ", task.getContent()));
     Date deadline = Prompt.inputDate(
         String.format("마감일(%s)? ", task.getDeadline()));
     String stateLabel = null;

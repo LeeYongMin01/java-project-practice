@@ -5,17 +5,18 @@ import java.util.List;
 import com.eomcs.pms.domain.Project;
 import com.eomcs.util.Prompt;
 
-public class ProjectHandler {
+public class ProjectUpdateCommand implements Command {
 
   List<Project> projectList;
   MemberListCommand memberListCommand;
 
-  public ProjectHandler(List<Project> list, MemberListCommand memberListCommand) {
+  public ProjectUpdateCommand(List<Project> list, MemberListCommand memberListCommand) {
     this.projectList = list;
     this.memberListCommand = memberListCommand;
   }
 
- public void update() {
+ @Override
+ public void execute() {
    System.out.println("[프로젝트 변경]");
    int no = Prompt.inputInt("번호? ");
    Project project = findByNo(no);
@@ -79,36 +80,6 @@ public class ProjectHandler {
    project.setMembers(members.toString());
 
    System.out.println("프로젝트를 변경하였습니다.");
- }
-
- public void delete() {
-   System.out.println("[회원 삭제]");
-   int no = Prompt.inputInt("번호? ");
-   int index = indexOf(no);
-
-   if(index == -1) {
-     System.out.println("해당 번호의 프로젝트가 없습니다.");
-     return;
-   }
-
-   String response = Prompt.inputString("정말 삭제하시겠습니까?(y/N) ");
-   if (!response.equalsIgnoreCase("y")) {
-     System.out.println("프로젝트 삭제를 취소하였습니다.");
-     return;
-   }
-
-   projectList.remove(index);
-   System.out.println("프로젝트를 삭제하였습니다.");
- }
-
- private int indexOf(int no) {
-   for (int i = 0; i < projectList.size(); i++) {
-     Project project = projectList.get(i);
-     if (project.getNo() == no) {
-       return i;
-     }
-   }
-   return -1;
  }
 
  private Project findByNo(int no) {
