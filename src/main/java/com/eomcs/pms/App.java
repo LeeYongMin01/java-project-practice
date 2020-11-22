@@ -93,12 +93,18 @@ public class App {
             System.out.println("안녕!");
             break loop;
           default:
-            Command command = commandMap.get(inputStr);
+           Command command = commandMap.get(inputStr);
             if(command != null) {
+              try{
               command.execute();
+             } catch(Exception e) {
+               System.out.println("-----------------------------");
+               System.out.printf("명령어 실행 중 오류 발생: %s\n", e);
+               System.out.println("-----------------------------");
+             }
             } else {
             System.out.println("실행할 수 없는 명령입니다.");
-            }
+           }
         }
         System.out.println();
       }
