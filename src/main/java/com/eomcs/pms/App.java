@@ -37,7 +37,7 @@ import com.eomcs.pms.handler.TaskListCommand;
 import com.eomcs.pms.handler.TaskUpdateCommand;
 import com.eomcs.util.Prompt;
 
-public class App { 
+public class App {
 
   public static void main(String[] args) {
 
