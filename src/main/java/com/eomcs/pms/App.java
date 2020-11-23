@@ -1,5 +1,9 @@
 package com.eomcs.pms;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.sql.Date;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -39,11 +43,15 @@ import com.eomcs.util.Prompt;
 
 public class App {
 
+  static List<Board> boardList = new ArrayList<>();
+  static File boardFile = new File("./board.data"); // 게시글 저장 데이터를 받을 파일 준비
+  
   public static void main(String[] args) {
-
+    
+    loadBoards(); // 파일에서 게시글 읽어오기
+    
     Map<String,Command> commandMap = new HashMap<>();
 
-    List<Board> boardList = new ArrayList<>();
     commandMap.put("/board/add", new BoardAddCommand(boardList));
     commandMap.put("/board/list", new BoardListCommand(boardList));
     commandMap.put("/board/detail", new BoardDetailCommand(boardList));
@@ -109,6 +117,8 @@ public class App {
         System.out.println();
       }
     Prompt.close();
+    
+    saveBoards(); // 데이터를 파일에 저장
   }
 
   static void printCommandHistory(Iterator<String> iterator) {
@@ -126,4 +136,122 @@ public class App {
       System.out.println("history 명령 처리 중 오류 발생!");
     }
   }
+  
+  private static void saveBoards() {
+    FileOutputStream out = null;
+    // => 데이터 저장을 위해 데이터를 내보내야 하니까 출력스트림인 FileOutputStream 사용
+    
+  try {
+    out = new FileOutputStream(boardFile);
+    
+    // 데이터의 개수 출력
+    out.write(boardList.size() >> 24);
+    out.write(boardList.size() >> 16);
+    out.write(boardList.size() >> 8);
+    out.write(boardList.size());
+    
+    for(Board board : boardList) { // 게시글 번호 출력
+      out.write(board.getNo() >> 24);
+      out.write(board.getNo() >> 16);
+      out.write(board.getNo() >> 8);
+      out.write(board.getNo());
+      
+      // 바이트 파일로 만들어서 변수에 담기
+      
+      byte[] bytes = board.getTitle().getBytes("UTF-8"); 
+      out.write(bytes.length >> 8); // 2바이트
+      out.write(bytes.length);
+      out.write(bytes);
+      
+      bytes = board.getContent().getBytes("UTF-8");
+      out.write(bytes.length >> 8);
+      out.write(bytes.length);
+      out.write(bytes);
+      
+      bytes = board.getWriter().getBytes("UTF-8");
+      out.write(bytes.length >> 8);
+      out.write(bytes.length);
+      out.write(bytes);
+      
+      bytes = board.getRegisteredDate().toString().getBytes("UTF-8");
+      out.write(bytes);
+      
+      out.write(board.getViewCount() >> 24);
+      out.write(board.getViewCount() >> 16);
+      out.write(board.getViewCount() >> 8);
+      out.write(board.getViewCount());
+    }
+    System.out.printf("총 %d개의 게시글 데이터를 저장했습니다.\n", boardList.size());
+  } catch(Exception e) {
+    System.out.println("게시글 데이터의 파일 저장 중 오류 발생! - " + e.getMessage());
+    
+  } finally {
+    try {
+    out.close();
+  } catch(Exception e) {
+ 
+  }
+  }
+  }
+
+  private static void loadBoards() {
+
+    FileInputStream in = null;
+    
+    try { 
+    in = new FileInputStream(boardFile);
+    
+    int size = in.read() << 24;
+    size += in.read() << 16;
+    size += in.read() << 8;
+    size += in.read();
+    
+    for(int i = 0; i < size; i++) {
+      Board board = new Board();
+      
+      int value = in.read() << 24;
+      value += in.read() << 16;
+      value += in.read() << 8;
+      value += in.read();
+      board.setNo(value);
+      
+      byte[] bytes = new byte[3000];
+      
+      int len = in.read() << 8 | in.read();
+      in.read(bytes, 0, len);
+      board.setContent(new String(bytes, 0, len, "UTF-8"));
+      
+      len = in.read() << 8 | in.read();
+      in.read(bytes, 0, len);
+      board.setContent(new String(bytes, 0, len, "UTF-8"));
+      
+      len = in.read() << 8 | in.read();
+      in.read(bytes, 0, len);
+      board.setWriter(new String(bytes, 0, len, "UTF-8"));
+      
+      in.read(bytes, 0, 10);
+      board.setRegisteredDate(Date.valueOf(new String(bytes, 0, 10, "UTF-8")));
+      
+      value = in.read() << 24;
+      value += in.read() << 16;
+      value += in.read() << 8;
+      value += in.read();
+      board.setViewCount(value);
+      
+      boardList.add(board);
+    }
+    System.out.printf("총 %d 개의 게시글 데이터를 로딩했습니다.\n", boardList.size());
+    } catch(Exception e) {
+      System.out.println("게시글 파일 읽기 중 오류 발생! - " + e.getMessage());
+    
+    } finally {
+      try {
+        in.close();
+      } catch(Exception e) {
+        
+      }
+    }
+
+  }
+  
 }
