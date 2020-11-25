@@ -1,15 +1,18 @@
 package com.eomcs.pms.domain;
 
+import java.io.Serializable;
 import java.sql.Date;
 
-public class Board {
-  public int no;
-  public String title;
-  public String content;
-  public String writer;
-  public Date registeredDate;
-  public int viewCount;
-  
+public class Board implements Serializable {
+  private static final long serialVersionUID = 1L;
+
+  private int no;
+  private String title;
+  private String content;
+  private String writer;
+  private Date registeredDate;
+  private int viewCount;
+
   public int getNo() {
     return no;
   }

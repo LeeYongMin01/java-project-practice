@@ -1,16 +1,19 @@
 package com.eomcs.pms.domain;
 
+import java.io.Serializable;
 import java.sql.Date;
 
-public class Project {
-  public int no;
-  public String title;
-  public String content;
-  public Date startDate;
-  public Date endDate;
-  public String owner;
-  public String members;
-  
+public class Project implements Serializable {
+  private static final long serialVersionUID = 1L;
+
+  private int no;
+  private String title;
+  private String content;
+  private Date startDate;
+  private Date endDate;
+  private String owner;
+  private String members;
+
   public int getNo() {
     return no;
   }
@@ -53,5 +56,5 @@ public class Project {
   public void setMembers(String members) {
     this.members = members;
   }
-  
+
 }

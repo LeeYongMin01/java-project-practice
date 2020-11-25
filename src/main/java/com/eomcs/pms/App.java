@@ -1,10 +1,13 @@
 package com.eomcs.pms;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.Date;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -46,23 +49,23 @@ public class App {
 
   static List<Board> boardList = new ArrayList<>();
   static File boardFile = new File("./board.data"); // 게시글 저장 데이터를 받을 파일 준비
-  
+
   static List<Member> memberList = new ArrayList<>();
   static File memberFile = new File("./member.data");
-  
+
   static List<Project> projectList = new LinkedList<>();
   static File projectFile = new File("./project.data");
-  
+
   static List<Task> taskList = new ArrayList<>();
   static File taskFile = new File("./task.data");
-  
+
   public static void main(String[] args) {
-    
-    loadBoards(); 
+
+    loadBoards();
     loadMembers();
     loadProjects();
     loadTasks();
-    
+
     Map<String,Command> commandMap = new HashMap<>();
 
     commandMap.put("/board/add", new BoardAddCommand(boardList));
@@ -100,6 +103,10 @@ public class App {
       while (true) {
         String inputStr = Prompt.inputString("명령> ");
 
+        if(inputStr.length() == 0) {
+          continue;
+        }
+
         commandStack.push(inputStr);
         commandQueue.offer(inputStr);
 
@@ -127,12 +134,12 @@ public class App {
         System.out.println();
       }
     Prompt.close();
-    
-    saveBoards(); 
+
+    saveBoards();
     saveMembers();
     saveProjects();
     saveTasks();
-    
+
   }
 
   static void printCommandHistory(Iterator<String> iterator) {
@@ -150,181 +157,77 @@ public class App {
       System.out.println("history 명령 처리 중 오류 발생!");
     }
   }
-  
+
   private static void saveBoards() {
-    FileOutputStream out = null;
+    ObjectOutputStream out = null;
     // => 데이터 저장을 위해 데이터를 내보내야 하니까 출력스트림인 FileOutputStream 사용
-    
+
   try {
-    out = new FileOutputStream(boardFile);
-    
+    out = new ObjectOutputStream(
+        new BufferedOutputStream(
+            new FileOutputStream(boardFile)));
+
     // 데이터의 개수 출력
-    out.write(boardList.size() >> 24);
-    out.write(boardList.size() >> 16);
-    out.write(boardList.size() >> 8);
-    out.write(boardList.size());
-    
-    for(Board board : boardList) { // 게시글 번호 출력
-      out.write(board.getNo() >> 24);
-      out.write(board.getNo() >> 16);
-      out.write(board.getNo() >> 8);
-      out.write(board.getNo());
-      
-      // 바이트 파일로 만들어서 변수에 담기
-      
-      byte[] bytes = board.getTitle().getBytes("UTF-8"); 
-      out.write(bytes.length >> 8); // 2바이트
-      out.write(bytes.length);
-      out.write(bytes);
-      
-      bytes = board.getContent().getBytes("UTF-8");
-      out.write(bytes.length >> 8);
-      out.write(bytes.length);
-      out.write(bytes);
-      
-      bytes = board.getWriter().getBytes("UTF-8");
-      out.write(bytes.length >> 8);
-      out.write(bytes.length);
-      out.write(bytes);
-      
-      bytes = board.getRegisteredDate().toString().getBytes("UTF-8");
-      out.write(bytes);
-      
-      out.write(board.getViewCount() >> 24);
-      out.write(board.getViewCount() >> 16);
-      out.write(board.getViewCount() >> 8);
-      out.write(board.getViewCount());
+    out.writeInt(boardList.size());
+
+    for(Board board : boardList) {
+      out.writeObject(board);
     }
+
     System.out.printf("총 %d개의 게시글 데이터를 저장했습니다.\n", boardList.size());
   } catch(Exception e) {
     System.out.println("게시글 데이터의 파일 저장 중 오류 발생! - " + e.getMessage());
-    
+
   } finally {
     try {
     out.close();
   } catch(Exception e) {
- 
-  }
-  }
+
+      }
+    }
   }
 
   private static void loadBoards() {
 
-    FileInputStream in = null;
-    
-    try { 
-    in = new FileInputStream(boardFile);
-    
-    int size = in.read() << 24;
-    size += in.read() << 16;
-    size += in.read() << 8;
-    size += in.read();
-    
+    ObjectInputStream in = null;
+
+    try {
+    in = new ObjectInputStream(
+        new BufferedInputStream(
+            new FileInputStream(boardFile)));
+
+    int size = in.readInt();
+
     for(int i = 0; i < size; i++) {
-      Board board = new Board();
-      
-      int value = in.read() << 24;
-      value += in.read() << 16;
-      value += in.read() << 8;
-      value += in.read();
-      board.setNo(value);
-      
-      byte[] bytes = new byte[3000];
-      
-      int len = in.read() << 8 | in.read();
-      in.read(bytes, 0, len);
-      board.setContent(new String(bytes, 0, len, "UTF-8"));
-      
-      len = in.read() << 8 | in.read();
-      in.read(bytes, 0, len);
-      board.setContent(new String(bytes, 0, len, "UTF-8"));
-      
-      len = in.read() << 8 | in.read();
-      in.read(bytes, 0, len);
-      board.setWriter(new String(bytes, 0, len, "UTF-8"));
-      
-      in.read(bytes, 0, 10);
-      board.setRegisteredDate(Date.valueOf(new String(bytes, 0, 10, "UTF-8")));
-      
-      value = in.read() << 24;
-      value += in.read() << 16;
-      value += in.read() << 8;
-      value += in.read();
-      board.setViewCount(value);
-      
-      boardList.add(board);
+      boardList.add((Board)in.readObject());
+
     }
     System.out.printf("총 %d 개의 게시글 데이터를 로딩했습니다.\n", boardList.size());
     } catch(Exception e) {
       System.out.println("게시글 파일 읽기 중 오류 발생! - " + e.getMessage());
-    
+
     } finally {
       try {
         in.close();
       } catch(Exception e) {
-        
+
       }
     }
   }
-  
+
   private static void saveMembers() {
-    FileOutputStream out = null;
+    ObjectOutputStream out = null;
 
     try {
-      out = new FileOutputStream(memberFile);
+      out = new ObjectOutputStream(
+          new BufferedOutputStream(
+              new FileOutputStream(memberFile)));
 
-      // 데이터의 개수를 먼저 출력한다.(4바이트)
-      out.write(memberList.size() >> 24);
-      out.write(memberList.size() >> 16);
-      out.write(memberList.size() >> 8);
-      out.write(memberList.size());
+      out.writeInt(memberList.size());
 
       for (Member member : memberList) {
-        // 회원 목록에서 회원 데이터를 꺼내 바이너리 형식으로 출력한다.
-        // => 회원 번호 출력 (4바이트)
-        out.write(member.getNo() >> 24);
-        out.write(member.getNo() >> 16);
-        out.write(member.getNo() >> 8);
-        out.write(member.getNo());
+        out.writeObject(member);
 
-        // => 회원 이름 
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        byte[] bytes = member.getName().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 회원 이메일 
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        bytes = member.getEmail().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 회원 암호 
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        bytes = member.getPassword().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 회원 사진 
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        bytes = member.getPhoto().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 회원 전화 
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        bytes = member.getTel().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 회원 등록일(10바이트)
-        bytes = member.getRegisteredDate().toString().getBytes("UTF-8");
-        out.write(bytes);
       }
       System.out.printf("총 %d 개의 회원 데이터를 저장했습니다.\n", memberList.size());
 
@@ -338,64 +241,19 @@ public class App {
       }
     }
   }
-  
+
   private static void loadMembers() {
-    FileInputStream in = null;
+    ObjectInputStream in = null;
 
     try {
-      in = new FileInputStream(memberFile);
+      in = new ObjectInputStream(
+          new BufferedInputStream(
+              new FileInputStream(memberFile)));
 
-      // 데이터의 개수를 먼저 읽는다. (4바이트)
-      int size = in.read() << 24;
-      size += in.read() << 16;
-      size += in.read() << 8;
-      size += in.read();
+      int size = in.readInt();
 
       for (int i = 0; i < size; i++) {
-        // 데이터를 담을 객체 준비
-        Member member = new Member();
-
-        // 출력 형식에 맞춰서 파일에서 데이터를 읽는다.
-        // => 회원 번호 읽기
-        int value = in.read() << 24;
-        value += in.read() << 16;
-        value += in.read() << 8;
-        value += in.read();
-        member.setNo(value);
-
-        // 문자열을 읽을 바이트 배열을 준비한다.
-        byte[] bytes = new byte[30000];
-
-        // => 회원 이름 읽기
-        int len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        member.setName(new String(bytes, 0, len, "UTF-8"));
-
-        // => 회원 이메일 읽기
-        len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        member.setEmail(new String(bytes, 0, len, "UTF-8"));
-
-        // => 회원 암호 읽기
-        len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        member.setPassword(new String(bytes, 0, len, "UTF-8"));
-
-        // => 회원 사진 읽기
-        len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        member.setPhoto(new String(bytes, 0, len, "UTF-8"));
-
-        // => 회원 전화 읽기
-        len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        member.setTel(new String(bytes, 0, len, "UTF-8"));
-
-        // => 회원 등록일 읽기
-        in.read(bytes, 0, 10);
-        member.setRegisteredDate(Date.valueOf(new String(bytes, 0, 10, "UTF-8")));
-
-        memberList.add(member);
+        memberList.add((Member)in.readObject());
       }
       System.out.printf("총 %d 개의 회원 데이터를 로딩했습니다.\n", memberList.size());
 
@@ -408,62 +266,20 @@ public class App {
       }
     }
   }
-  
+
   private static void saveProjects() {
-    FileOutputStream out = null;
+    ObjectOutputStream out = null;
 
     try {
-      out = new FileOutputStream(projectFile);
+      out = new ObjectOutputStream(
+          new BufferedOutputStream(
+          new FileOutputStream(projectFile)));
 
-      // 데이터의 개수를 먼저 출력한다.(4바이트)
-      out.write(projectList.size() >> 24);
-      out.write(projectList.size() >> 16);
-      out.write(projectList.size() >> 8);
-      out.write(projectList.size());
+      out.writeInt(projectList.size());
 
       for (Project project : projectList) {
-        // 프로젝트 목록에서 프로젝트 데이터를 꺼내 바이너리 형식으로 출력한다.
-        // => 프로젝트 번호 출력 (4바이트)
-        out.write(project.getNo() >> 24);
-        out.write(project.getNo() >> 16);
-        out.write(project.getNo() >> 8);
-        out.write(project.getNo());
-
-        // => 프로젝트 제목 
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        byte[] bytes = project.getTitle().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 프로젝트 내용
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        bytes = project.getContent().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 프로젝트 시작일(10바이트)
-        bytes = project.getStartDate().toString().getBytes("UTF-8");
-        out.write(bytes);
-
-        // => 프로젝트 종료일(10바이트) 
-        bytes = project.getEndDate().toString().getBytes("UTF-8");
-        out.write(bytes);
-
-        // => 프로젝트 소유주
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        bytes = project.getOwner().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 프로젝트 멤버들
-        bytes = project.getMembers().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-      }
+        out.writeObject(project);
+    }
       System.out.printf("총 %d 개의 프로젝트 데이터를 저장했습니다.\n", projectList.size());
 
     } catch (IOException e) {
@@ -478,61 +294,17 @@ public class App {
   }
 
   private static void loadProjects() {
-    FileInputStream in = null;
+    ObjectInputStream in = null;
 
     try {
-      in = new FileInputStream(projectFile);
+      in = new ObjectInputStream(
+          new BufferedInputStream(
+              new FileInputStream(projectFile)));
 
-      // 데이터의 개수를 먼저 읽는다. (4바이트)
-      int size = in.read() << 24;
-      size += in.read() << 16;
-      size += in.read() << 8;
-      size += in.read();
+      int size = in.readInt();
 
       for (int i = 0; i < size; i++) {
-        // 데이터를 담을 객체 준비
-        Project project = new Project();
-
-        // 출력 형식에 맞춰서 파일에서 데이터를 읽는다.
-        // => 프로젝트 번호 읽기
-        int value = in.read() << 24;
-        value += in.read() << 16;
-        value += in.read() << 8;
-        value += in.read();
-        project.setNo(value);
-
-        // 문자열을 읽을 바이트 배열을 준비한다.
-        byte[] bytes = new byte[30000];
-
-        // => 프로젝트 제목 읽기
-        int len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        project.setTitle(new String(bytes, 0, len, "UTF-8"));
-
-        // => 프로젝트 내용 읽기
-        len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        project.setContent(new String(bytes, 0, len, "UTF-8"));
-
-        // => 프로젝트 시작일 읽기
-        in.read(bytes, 0, 10);
-        project.setStartDate(Date.valueOf(new String(bytes, 0, 10, "UTF-8")));
-
-        // => 프로젝트 종료일 읽기
-        in.read(bytes, 0, 10);
-        project.setEndDate(Date.valueOf(new String(bytes, 0, 10, "UTF-8")));
-
-        // => 프로젝트 소유주 읽기
-        len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        project.setOwner(new String(bytes, 0, len, "UTF-8"));
-
-        // => 프로젝트 멤버들 읽기
-        len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        project.setMembers(new String(bytes, 0, len, "UTF-8"));
-
-        projectList.add(project);
+        projectList.add((Project)in.readObject());
       }
       System.out.printf("총 %d 개의 프로젝트 데이터를 로딩했습니다.\n", projectList.size());
 
@@ -545,51 +317,19 @@ public class App {
       }
     }
   }
-  
+
   private static void saveTasks() {
-    FileOutputStream out = null;
+    ObjectOutputStream out = null;
 
     try {
-      out = new FileOutputStream(taskFile);
+      out = new ObjectOutputStream(
+          new BufferedOutputStream(
+              new FileOutputStream(taskFile)));
 
-      // 데이터의 개수를 먼저 출력한다.(4바이트)
-      out.write(taskList.size() >> 24);
-      out.write(taskList.size() >> 16);
-      out.write(taskList.size() >> 8);
-      out.write(taskList.size());
-
+      out.writeInt(taskList.size());
       for (Task task : taskList) {
-        // 작업 목록에서 작업 데이터를 꺼내 바이너리 형식으로 출력한다.
-        // => 작업 번호 출력 (4바이트)
-        out.write(task.getNo() >> 24);
-        out.write(task.getNo() >> 16);
-        out.write(task.getNo() >> 8);
-        out.write(task.getNo());
-
-        // => 작업 내용 
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        byte[] bytes = task.getContent().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-
-        // => 작업 종료일(10바이트)
-        bytes = task.getDeadline().toString().getBytes("UTF-8");
-        out.write(bytes);
-
-        // => 작업 상태 출력 (4바이트)
-        out.write(task.getStatus() >> 24);
-        out.write(task.getStatus() >> 16);
-        out.write(task.getStatus() >> 8);
-        out.write(task.getStatus());
-
-        // => 작업 소유주
-        //    문자열의 바이트 길이(2바이트) + 문자열의 바이트 배열
-        bytes = task.getOwner().getBytes("UTF-8");
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-      }
+        out.writeObject(task);
+    }
       System.out.printf("총 %d 개의 작업 데이터를 저장했습니다.\n", taskList.size());
 
     } catch (IOException e) {
@@ -604,54 +344,18 @@ public class App {
   }
 
   private static void loadTasks() {
-    FileInputStream in = null;
+    ObjectInputStream in = null;
 
     try {
-      in = new FileInputStream(taskFile);
+      in = new ObjectInputStream(
+          new BufferedInputStream(
+              new FileInputStream(taskFile)));
 
-      // 데이터의 개수를 먼저 읽는다. (4바이트)
-      int size = in.read() << 24;
-      size += in.read() << 16;
-      size += in.read() << 8;
-      size += in.read();
+      int size = in.readInt();
 
       for (int i = 0; i < size; i++) {
-        // 데이터를 담을 객체 준비
-        Task task = new Task();
+        taskList.add((Task)in.readObject());
 
-        // 출력 형식에 맞춰서 파일에서 데이터를 읽는다.
-        // => 작업 번호 읽기
-        int value = in.read() << 24;
-        value += in.read() << 16;
-        value += in.read() << 8;
-        value += in.read();
-        task.setNo(value);
-
-        // 문자열을 읽을 바이트 배열을 준비한다.
-        byte[] bytes = new byte[30000];
-
-        // => 작업 내용 읽기
-        int len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        task.setContent(new String(bytes, 0, len, "UTF-8"));
-
-        // => 작업 종료일 읽기
-        in.read(bytes, 0, 10);
-        task.setDeadline(Date.valueOf(new String(bytes, 0, 10, "UTF-8")));
-
-        // => 작업 상태 읽기
-        value = in.read() << 24;
-        value += in.read() << 16;
-        value += in.read() << 8;
-        value += in.read();
-        task.setStatus(value);
-
-        // => 작업 소유주 읽기
-        len = in.read() << 8 | in.read();
-        in.read(bytes, 0, len);
-        task.setOwner(new String(bytes, 0, len, "UTF-8"));
-
-        taskList.add(task);
       }
       System.out.printf("총 %d 개의 작업 데이터를 로딩했습니다.\n", taskList.size());
 

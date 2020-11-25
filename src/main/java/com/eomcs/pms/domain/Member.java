@@ -1,16 +1,19 @@
 package com.eomcs.pms.domain;
 
+import java.io.Serializable;
 import java.sql.Date;
 
-public class Member {
-  public int no;
-  public String name;
-  public String email;
-  public String password;
-  public String photo;
-  public String tel;
-  public Date registeredDate;
-  
+public class Member implements Serializable {
+  private static final long serialVersionUID = 1L;
+
+  private int no;
+  private String name;
+  private String email;
+  private String password;
+  private String photo;
+  private String tel;
+  private Date registeredDate;
+
   public int getNo() {
     return no;
   }

@@ -1,15 +1,17 @@
 package com.eomcs.pms.domain;
 
+import java.io.Serializable;
 import java.sql.Date;
 
-public class Task {
+public class Task implements Serializable {
+  private static final long serialVersionUID = 1L;
 
-  public int no;
-  public String content;
-  public Date deadline;
-  public String owner;
-  public int status;
-  
+  private int no;
+  private String content;
+  private Date deadline;
+  private String owner;
+  private int status;
+
   public int getNo() {
     return no;
   }
