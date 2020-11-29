@@ -48,7 +48,7 @@ import com.eomcs.util.Prompt;
 public class App {
 
   static List<Board> boardList = new ArrayList<>();
-  static File boardFile = new File("./board.data"); // 게시글 저장 데이터를 받을 파일 준비
+  static File boardFile = new File("./board.data"); // 게시글 저장 데이터를 받을 파일 준비 
 
   static List<Member> memberList = new ArrayList<>();
   static File memberFile = new File("./member.data");
