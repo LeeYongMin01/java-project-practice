@@ -1,18 +1,18 @@
 package com.eomcs.pms.domain;
 
-import java.io.Serializable;
 import java.sql.Date;
+import java.util.List;
 
-public class Project implements Serializable {
-  private static final long serialVersionUID = 1L;
-
+//Project 클래스는 더이상 CsvObject를 구현할 필요가 없다.
+//
+public class Project {
   private int no;
   private String title;
   private String content;
   private Date startDate;
   private Date endDate;
-  private String owner;
-  private String members;
+  private Member owner;
+  private List<Member> members;
 
   public int getNo() {
     return no;
@@ -44,17 +44,16 @@ public class Project implements Serializable {
   public void setEndDate(Date endDate) {
     this.endDate = endDate;
   }
-  public String getOwner() {
+  public Member getOwner() {
     return owner;
   }
-  public void setOwner(String owner) {
+  public void setOwner(Member owner) {
     this.owner = owner;
   }
-  public String getMembers() {
+  public List<Member> getMembers() {
     return members;
   }
-  public void setMembers(String members) {
+  public void setMembers(List<Member> members) {
     this.members = members;
   }
-
 }

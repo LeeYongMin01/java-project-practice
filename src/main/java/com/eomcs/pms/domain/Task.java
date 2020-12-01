@@ -1,16 +1,15 @@
 package com.eomcs.pms.domain;
 
-import java.io.Serializable;
 import java.sql.Date;
 
-public class Task implements Serializable {
-  private static final long serialVersionUID = 1L;
-
+public class Task {
   private int no;
   private String content;
   private Date deadline;
-  private String owner;
   private int status;
+  private Member owner;
+  private int projectNo;
+  private String projectTitle;
 
   public int getNo() {
     return no;
@@ -30,16 +29,29 @@ public class Task implements Serializable {
   public void setDeadline(Date deadline) {
     this.deadline = deadline;
   }
-  public String getOwner() {
-    return owner;
-  }
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
   public int getStatus() {
     return status;
   }
   public void setStatus(int status) {
     this.status = status;
   }
+  public Member getOwner() {
+    return owner;
+  }
+  public void setOwner(Member owner) {
+    this.owner = owner;
+  }
+  public int getProjectNo() {
+    return projectNo;
+  }
+  public void setProjectNo(int projectNo) {
+    this.projectNo = projectNo;
+  }
+  public String getProjectTitle() {
+    return projectTitle;
+  }
+  public void setProjectTitle(String projectTitle) {
+    this.projectTitle = projectTitle;
+  }
+
 }
