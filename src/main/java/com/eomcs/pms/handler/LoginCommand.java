@@ -1,41 +1,50 @@
 package com.eomcs.pms.handler;
 
+import java.io.BufferedReader;
+import java.io.PrintWriter;
 import java.util.Map;
-import com.eomcs.pms.dao.MemberDao;
 import com.eomcs.pms.domain.Member;
+import com.eomcs.pms.service.MemberService;
 import com.eomcs.util.Prompt;
 
+@CommandAnno("/login")
 public class LoginCommand implements Command {
 
-  MemberDao memberDao;
+  MemberService memberService;
 
-  public LoginCommand(MemberDao memberDao) {
-    this.memberDao = memberDao;
+  public LoginCommand(MemberService memberService) {
+    this.memberService = memberService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[로그인]");
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+    BufferedReader in = request.getReader();
+    Map<String,Object> session = request.getSession();
 
-    if (context.get("loginUser") != null) {
-      System.out.println("로그인 되어 있습니다!");
+    out.println("[로그인]");
+
+    if (session.get("loginUser") != null) {
+      out.println("로그인 되어 있습니다!");
       return;
     }
 
-    String email = Prompt.inputString("이메일? ");
-    String password = Prompt.inputString("암호? ");
-
     try {
-      Member member = memberDao.findByEmailPassword(email, password);
+      String email = Prompt.inputString("이메일? ", out, in);
+      String password = Prompt.inputString("암호? ", out, in);
+
+      Member member = memberService.get(email, password);
       if (member == null) {
-        System.out.println("사용자 정보가 맞지 않습니다.");
+        out.println("사용자 정보가 맞지 않습니다.");
       } else {
-        // 로그인이 성공했으면 회원 정보를 context 보관소에 저장한다.
-        context.put("loginUser", member);
-        System.out.printf("%s 님 반갑습니다.\n", member.getName());
+        // 로그인이 성공했으면 회원 정보를
+        // 각 클라이언트의 전용 보관소인 session에 저장한다.
+        session.put("loginUser", member);
+        out.printf("%s 님 반갑습니다.\n", member.getName());
       }
+
     } catch (Exception e) {
-      System.out.println("로그인 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }

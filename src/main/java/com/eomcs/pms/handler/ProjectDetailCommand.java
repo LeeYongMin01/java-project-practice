@@ -1,55 +1,60 @@
 package com.eomcs.pms.handler;
 
-import java.util.HashMap;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
-import com.eomcs.pms.dao.ProjectDao;
-import com.eomcs.pms.dao.TaskDao;
 import com.eomcs.pms.domain.Project;
 import com.eomcs.pms.domain.Task;
+import com.eomcs.pms.service.ProjectService;
+import com.eomcs.pms.service.TaskService;
 import com.eomcs.util.Prompt;
 
+@CommandAnno("/project/detail")
 public class ProjectDetailCommand implements Command {
-  ProjectDao projectDao;
-  TaskDao taskDao;
 
-  public ProjectDetailCommand(ProjectDao projectDao, TaskDao taskDao) {
-    this.projectDao = projectDao;
-    this.taskDao = taskDao;
+  ProjectService projectService;
+  TaskService taskService;
+
+  public ProjectDetailCommand(
+      ProjectService projectService,
+      TaskService taskService) {
+    this.projectService = projectService;
+    this.taskService = taskService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[프로젝트 상세보기]");
-    int no = Prompt.inputInt("번호? ");
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+    BufferedReader in = request.getReader();
 
     try {
-      Project project = projectDao.findByNo(no);
+      out.println("[프로젝트 상세보기]");
+      int no = Prompt.inputInt("번호? ", out, in);
+
+      Project project = projectService.get(no);
+
       if (project == null) {
-        System.out.println("해당 번호의 프로젝트가 존재하지 않습니다.");
+        out.println("해당 번호의 프로젝트가 없습니다.");
         return;
       }
 
-      System.out.printf("프로젝트명: %s\n", project.getTitle());
-      System.out.printf("내용: %s\n", project.getContent());
-      System.out.printf("기간: %s ~ %s\n",
+      out.printf("프로젝트명: %s\n", project.getTitle());
+      out.printf("내용: %s\n", project.getContent());
+      out.printf("기간: %s ~ %s\n",
           project.getStartDate(),
           project.getEndDate());
-      System.out.printf("관리자: %s\n", project.getOwner().getName());
-      System.out.print("팀원: ");
+      out.printf("관리자: %s\n", project.getOwner().getName());
+      out.print("팀원: ");
       project.getMembers().forEach(
-          member -> System.out.print(member.getName() + " "));
-      System.out.println();
+          member -> out.print(member.getName() + " "));
+      out.println();
 
-      System.out.println("작업:");
-      System.out.println("--------------------------------");
+      out.println("작업:");
+      out.println("--------------------------------");
 
-      HashMap<String,Object> map = new HashMap<>();
-      map.put("projectNo", project.getNo());
+      List<Task> tasks = taskService.listByProject(no);
 
-      List<Task> tasks = taskDao.findAll(map);
-
-      System.out.println("번호, 작업내용, 마감일, 작업자, 상태");
+      out.println("번호, 작업내용, 마감일, 작업자, 상태");
       for (Task task : tasks) {
         String stateLabel = null;
         switch (task.getStatus()) {
@@ -62,7 +67,7 @@ public class ProjectDetailCommand implements Command {
           default:
             stateLabel = "신규";
         }
-        System.out.printf("%d, %s, %s, %s, %s\n",
+        out.printf("%d, %s, %s, %s, %s\n",
             task.getNo(),
             task.getContent(),
             task.getDeadline(),
@@ -71,7 +76,7 @@ public class ProjectDetailCommand implements Command {
       }
 
     } catch (Exception e) {
-      System.out.println("프로젝트 조회 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }

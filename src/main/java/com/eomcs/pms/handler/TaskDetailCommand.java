@@ -1,32 +1,38 @@
 package com.eomcs.pms.handler;
 
-import java.util.Map;
-import com.eomcs.pms.dao.TaskDao;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
 import com.eomcs.pms.domain.Task;
+import com.eomcs.pms.service.TaskService;
 import com.eomcs.util.Prompt;
 
+@CommandAnno("/task/detail")
 public class TaskDetailCommand implements Command {
-  TaskDao taskDao;
 
-  public TaskDetailCommand(TaskDao taskDao) {
-    this.taskDao = taskDao;
+  TaskService taskService;
+
+  public TaskDetailCommand(TaskService taskService) {
+    this.taskService = taskService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[작업 상세보기]");
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+    BufferedReader in = request.getReader();
 
     try {
-      int no = Prompt.inputInt("번호? ");
+      out.println("[작업 상세보기]");
 
-      Task task = taskDao.findByNo(no);
+      int no = Prompt.inputInt("번호? ", out, in);
+
+      Task task = taskService.get(no);
       if (task == null) {
-        System.out.println("해당 번호의 작업이 존재하지 않습니다.");
+        out.println("해당 번호의 작업이 존재하지 않습니다.");
         return;
       }
 
-      System.out.printf("내용: %s\n", task.getContent());
-      System.out.printf("마감일: %s\n", task.getDeadline());
+      out.printf("내용: %s\n", task.getContent());
+      out.printf("마감일: %s\n", task.getDeadline());
 
       String stateLabel = null;
       switch (task.getStatus()) {
@@ -39,11 +45,11 @@ public class TaskDetailCommand implements Command {
         default:
           stateLabel = "신규";
       }
-      System.out.printf("상태: %s\n", stateLabel);
-      System.out.printf("담당자: %s\n", task.getOwner().getName());
+      out.printf("상태: %s\n", stateLabel);
+      out.printf("담당자: %s\n", task.getOwner().getName());
 
     } catch (Exception e) {
-      System.out.println("작업 조회 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }

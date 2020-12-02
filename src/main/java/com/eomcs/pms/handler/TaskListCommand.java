@@ -1,24 +1,28 @@
 package com.eomcs.pms.handler;
 
+import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
-import com.eomcs.pms.dao.TaskDao;
 import com.eomcs.pms.domain.Task;
+import com.eomcs.pms.service.TaskService;
 
+@CommandAnno("/task/list")
 public class TaskListCommand implements Command {
-  TaskDao taskDao;
 
-  public TaskListCommand(TaskDao taskDao) {
-    this.taskDao = taskDao;
+  TaskService taskService;
+
+  public TaskListCommand(TaskService taskService) {
+    this.taskService = taskService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[작업 목록]");
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+
+    out.println("[작업 목록]");
 
     try {
-      List<Task> list = taskDao.findAll(null);
-      System.out.println("번호, 작업내용, 마감일, 작업자, 상태");
+      List<Task> list = taskService.list();
+      out.println("번호, 작업내용, 마감일, 작업자, 상태");
 
       for (Task task : list) {
         String stateLabel = null;
@@ -32,7 +36,7 @@ public class TaskListCommand implements Command {
           default:
             stateLabel = "신규";
         }
-        System.out.printf("%d, %s, %s, %s, %s\n",
+        out.printf("%d, %s, %s, %s, %s\n",
             task.getNo(),
             task.getContent(),
             task.getDeadline(),
@@ -40,7 +44,7 @@ public class TaskListCommand implements Command {
             stateLabel);
       }
     } catch (Exception e) {
-      System.out.println("작업 목록 조회 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }

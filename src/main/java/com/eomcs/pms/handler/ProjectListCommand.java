@@ -1,25 +1,29 @@
 package com.eomcs.pms.handler;
 
+import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
-import com.eomcs.pms.dao.ProjectDao;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.domain.Project;
+import com.eomcs.pms.service.ProjectService;
 
+@CommandAnno("/project/list")
 public class ProjectListCommand implements Command {
-  ProjectDao projectDao;
 
-  public ProjectListCommand(ProjectDao projectDao) {
-    this.projectDao = projectDao;
+  ProjectService projectService;
+
+  public ProjectListCommand(ProjectService projectService) {
+    this.projectService = projectService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[프로젝트 목록]");
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+
+    out.println("[프로젝트 목록]");
 
     try {
-      List<Project> list = projectDao.findAll();
-      System.out.println("번호, 프로젝트명, 시작일 ~ 종료일, 관리자, 팀원");
+      List<Project> list = projectService.list();
+      out.println("번호, 프로젝트명, 시작일 ~ 종료일, 관리자, 팀원");
 
       for (Project project : list) {
         StringBuilder members = new StringBuilder();
@@ -30,7 +34,7 @@ public class ProjectListCommand implements Command {
           members.append(member.getName());
         }
 
-        System.out.printf("%d, %s, %s ~ %s, %s, [%s]\n",
+        out.printf("%d, %s, %s ~ %s, %s, [%s]\n",
             project.getNo(),
             project.getTitle(),
             project.getStartDate(),
@@ -39,7 +43,7 @@ public class ProjectListCommand implements Command {
             members.toString());
       }
     } catch (Exception e) {
-      System.out.println("프로젝트 목록 조회 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }

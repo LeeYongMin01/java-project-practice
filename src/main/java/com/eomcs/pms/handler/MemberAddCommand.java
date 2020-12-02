@@ -1,35 +1,40 @@
 package com.eomcs.pms.handler;
 
-import java.util.Map;
-import com.eomcs.pms.dao.MemberDao;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
 import com.eomcs.pms.domain.Member;
+import com.eomcs.pms.service.MemberService;
 import com.eomcs.util.Prompt;
 
+@CommandAnno("/member/add")
 public class MemberAddCommand implements Command {
 
-  MemberDao memberDao;
+  MemberService memberService;
 
-  public MemberAddCommand(MemberDao memberDao) {
-    this.memberDao = memberDao;
+  public MemberAddCommand(MemberService memberService) {
+    this.memberService = memberService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[회원 등록]");
-
-    Member member = new Member();
-    member.setName(Prompt.inputString("이름? "));
-    member.setEmail(Prompt.inputString("이메일? "));
-    member.setPassword(Prompt.inputString("암호? "));
-    member.setPhoto(Prompt.inputString("사진? "));
-    member.setTel(Prompt.inputString("전화? "));
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+    BufferedReader in = request.getReader();
 
     try {
-      memberDao.insert(member);
+      out.println("[회원 등록]");
+
+      Member member = new Member();
+      member.setName(Prompt.inputString("이름? ", out, in));
+      member.setEmail(Prompt.inputString("이메일? ", out, in));
+      member.setPassword(Prompt.inputString("암호? ", out, in));
+      member.setPhoto(Prompt.inputString("사진? ", out, in));
+      member.setTel(Prompt.inputString("전화? ", out, in));
+
+      memberService.add(member);
       System.out.println("회원을 등록하였습니다.");
 
     } catch (Exception e) {
-      System.out.println("회원 등록 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }

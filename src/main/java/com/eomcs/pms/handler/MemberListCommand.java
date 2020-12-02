@@ -1,26 +1,31 @@
 package com.eomcs.pms.handler;
 
+import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
-import com.eomcs.pms.dao.MemberDao;
 import com.eomcs.pms.domain.Member;
+import com.eomcs.pms.service.MemberService;
 
+@CommandAnno("/member/list")
 public class MemberListCommand implements Command {
-  MemberDao memberDao;
 
-  public MemberListCommand(MemberDao memberDao) {
-    this.memberDao = memberDao;
+  MemberService memberService;
+
+  public MemberListCommand(MemberService memberService) {
+    this.memberService = memberService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[회원 목록]");
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+
+    out.println("[회원 목록]");
 
     try {
-      List<Member> list = memberDao.findAll();
-      System.out.println("번호, 이름, 이메일, 전화, 등록일");
+      List<Member> list = memberService.list();
+
+      out.println("번호, 이름, 이메일, 전화, 등록일");
       for (Member member : list) {
-        System.out.printf("%d, %s, %s, %s, %s\n",
+        out.printf("%d, %s, %s, %s, %s\n",
             member.getNo(),
             member.getName(),
             member.getEmail(),
@@ -28,7 +33,7 @@ public class MemberListCommand implements Command {
             member.getRegisteredDate());
       }
     } catch (Exception e) {
-      System.out.println("회원 목록 조회 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }

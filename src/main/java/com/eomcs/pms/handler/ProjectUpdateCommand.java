@@ -1,55 +1,76 @@
 package com.eomcs.pms.handler;
 
-import java.util.Map;
-import com.eomcs.pms.dao.MemberDao;
-import com.eomcs.pms.dao.ProjectDao;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.sql.Date;
 import com.eomcs.pms.domain.Project;
+import com.eomcs.pms.service.ProjectService;
 import com.eomcs.util.Prompt;
 
+@CommandAnno("/project/update")
 public class ProjectUpdateCommand implements Command {
 
-  ProjectDao projectDao;
-  MemberDao memberDao;
+  ProjectService projectService;
 
-  public ProjectUpdateCommand(ProjectDao projectDao, MemberDao memberDao) {
-    this.projectDao = projectDao;
-    this.memberDao = memberDao;
+  public ProjectUpdateCommand(ProjectService projectService) {
+    this.projectService = projectService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[프로젝트 변경]");
-    int no = Prompt.inputInt("번호? ");
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+    BufferedReader in = request.getReader();
 
     try {
-      Project project = projectDao.findByNo(no);
+      out.println("[프로젝트 변경]");
+      int no = Prompt.inputInt("번호? ", out, in);
+
+      Project project = projectService.get(no);
+
       if (project == null) {
-        System.out.println("해당 번호의 프로젝트가 존재하지 않습니다.");
+        out.println("해당 번호의 프로젝트가 없습니다.");
         return;
       }
 
-      project.setTitle(Prompt.inputString(String.format(
-          "프로젝트명(%s)? ", project.getTitle())));
-      project.setContent(Prompt.inputString(String.format(
-          "내용(%s)? ", project.getContent())));
-      project.setStartDate(Prompt.inputDate(String.format(
-          "시작일(%s)? ", project.getStartDate())));
-      project.setEndDate(Prompt.inputDate(String.format(
-          "종료일(%s)? ", project.getEndDate())));
+      String value = Prompt.inputString(String.format(
+          "프로젝트명(%s)? ", project.getTitle()), out, in);
+      if (value.length() > 0) {
+        project.setTitle(value);
+      }
+
+      value = Prompt.inputString(String.format(
+          "내용(%s)? ", project.getContent()), out, in);
+      if (value.length() > 0) {
+        project.setContent(value);
+      }
+
+      value = Prompt.inputString(String.format(
+          "시작일(%s)? ", project.getStartDate()), out, in);
+      if (value.length() > 0) {
+        project.setStartDate(Date.valueOf(value));
+      }
+
+      value = Prompt.inputString(String.format(
+          "종료일(%s)? ", project.getEndDate()), out, in);
+      if (value.length() > 0) {
+        project.setEndDate(Date.valueOf(value));
+      }
 
       String response = Prompt.inputString("정말 변경하시겠습니까?(y/N) ");
       if (!response.equalsIgnoreCase("y")) {
-        System.out.println("프로젝트 변경을 취소하였습니다.");
+        out.println("프로젝트 변경을 취소하였습니다.");
         return;
       }
 
-      if (projectDao.update(project) == 0) {
-        System.out.println("해당 번호의 프로젝트가 존재하지 않습니다.");
-      } else {
-        System.out.println("프로젝트를 변경하였습니다.");
+      if (projectService.update(project) == 0) {
+        out.println("해당 번호의 프로젝트가 존재하지 않습니다.");
+        return;
       }
+
+      out.println("프로젝트를 변경하였습니다.");
+
     } catch (Exception e) {
-      System.out.println("프로젝트 변경 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }

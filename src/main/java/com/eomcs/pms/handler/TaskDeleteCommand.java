@@ -1,37 +1,43 @@
 package com.eomcs.pms.handler;
 
-import java.util.Map;
-import com.eomcs.pms.dao.TaskDao;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import com.eomcs.pms.service.TaskService;
 import com.eomcs.util.Prompt;
 
+@CommandAnno("/task/delete")
 public class TaskDeleteCommand implements Command {
-  TaskDao taskDao;
 
-  public TaskDeleteCommand(TaskDao taskDao) {
-    this.taskDao = taskDao;
+  TaskService taskService;
+
+  public TaskDeleteCommand(TaskService taskService) {
+    this.taskService = taskService;
   }
 
   @Override
-  public void execute(Map<String,Object> context) {
-    System.out.println("[작업 삭제]");
+  public void execute(Request request) {
+    PrintWriter out = request.getWriter();
+    BufferedReader in = request.getReader();
 
-    try  {
-      int no = Prompt.inputInt("번호? ");
+    try {
+      out.println("[작업 삭제]");
+      int no = Prompt.inputInt("번호? ", out, in);
 
-      String response = Prompt.inputString("정말 삭제하시겠습니까?(y/N) ");
+      String response = Prompt.inputString("정말 삭제하시겠습니까?(y/N) ", out, in);
       if (!response.equalsIgnoreCase("y")) {
-        System.out.println("작업 삭제를 취소하였습니다.");
+        out.println("작업 삭제를 취소하였습니다.");
         return;
       }
 
-      if (taskDao.delete(no) == 0) {
-        System.out.println("해당 번호의 작업이 존재하지 않습니다.");
-      } else {
-        System.out.println("작업을 삭제하였습니다.");
+      if (taskService.delete(no) == 0) {
+        out.println("해당 번호의 작업이 존재하지 않습니다.");
+        return ;
       }
 
+      out.println("작업을 삭제하였습니다.");
+
     } catch (Exception e) {
-      System.out.println("작업 삭제 중 오류 발생!");
+      out.printf("작업 처리 중 오류 발생! - %s\n", e.getMessage());
       e.printStackTrace();
     }
   }
